@@ -64,7 +64,7 @@
             }
         }
 
-        /* --- شاشة التسجيل والتسجيل الحقيقي عبر Firebase --- */
+        /* --- شاشة التسجيل عبر Firebase --- */
         .auth-screen {
             position: absolute;
             inset: 0;
@@ -388,16 +388,28 @@
 </div>
 
 <script>
-    // تم دمج بيانات مشروعك ad7am-f3c66 بنجاح هنا ✅
+    // ⚙️ إعدادات ومتغيرات البيئة (Environment Variables)
+    // يمكنك استبدال القيم الحالية بمتغيرات النظام عند بناء التطبيق برمجياً
+    const envVariables = {
+        FIREBASE_API_KEY: typeof process !== 'undefined' && process.env.FIREBASE_API_KEY ? process.env.FIREBASE_API_KEY : "YOUR_API_KEY_HERE",
+        FIREBASE_AUTH_DOMAIN: typeof process !== 'undefined' && process.env.FIREBASE_AUTH_DOMAIN ? process.env.FIREBASE_AUTH_DOMAIN : "YOUR_AUTH_DOMAIN_HERE",
+        FIREBASE_DATABASE_URL: typeof process !== 'undefined' && process.env.FIREBASE_DATABASE_URL ? process.env.FIREBASE_DATABASE_URL : "YOUR_DATABASE_URL_HERE",
+        FIREBASE_PROJECT_ID: typeof process !== 'undefined' && process.env.FIREBASE_PROJECT_ID ? process.env.FIREBASE_PROJECT_ID : "YOUR_PROJECT_ID_HERE",
+        FIREBASE_STORAGE_BUCKET: typeof process !== 'undefined' && process.env.FIREBASE_STORAGE_BUCKET ? process.env.FIREBASE_STORAGE_BUCKET : "YOUR_STORAGE_BUCKET_HERE",
+        FIREBASE_MESSAGING_SENDER_ID: typeof process !== 'undefined' && process.env.FIREBASE_MESSAGING_SENDER_ID ? process.env.FIREBASE_MESSAGING_SENDER_ID : "YOUR_MESSAGING_SENDER_ID_HERE",
+        FIREBASE_APP_ID: typeof process !== 'undefined' && process.env.FIREBASE_APP_ID ? process.env.FIREBASE_APP_ID : "YOUR_APP_ID_HERE",
+        FIREBASE_MEASUREMENT_ID: typeof process !== 'undefined' && process.env.FIREBASE_MEASUREMENT_ID ? process.env.FIREBASE_MEASUREMENT_ID : "YOUR_MEASUREMENT_ID_HERE"
+    };
+
     const firebaseConfig = {
-        apiKey: "AIzaSyCvu2oTi98xSIRELfpv7X_U-_Lo_isIOJQ",
-        authDomain: "ad7am-f3c66.firebaseapp.com",
-        databaseURL: "https://ad7am-f3c66-default-rtdb.firebaseio.com",
-        projectId: "ad7am-f3c66",
-        storageBucket: "ad7am-f3c66.firebasestorage.app",
-        messagingSenderId: "767868074527",
-        appId: "1:767868074527:web:a2a4918dad31c7220bf32a",
-        measurementId: "G-XCZPMJ8J2K"
+        apiKey: envVariables.FIREBASE_API_KEY,
+        authDomain: envVariables.FIREBASE_AUTH_DOMAIN,
+        databaseURL: envVariables.FIREBASE_DATABASE_URL,
+        projectId: envVariables.FIREBASE_PROJECT_ID,
+        storageBucket: envVariables.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: envVariables.FIREBASE_MESSAGING_SENDER_ID,
+        appId: envVariables.FIREBASE_APP_ID,
+        measurementId: envVariables.FIREBASE_MEASUREMENT_ID
     };
 
     // تهيئة Firebase
@@ -483,13 +495,30 @@
                 const div = document.createElement('div');
                 div.className = 'chat-item';
                 div.onclick = () => openChatRoom(targetUid, chat.name, chat.avatar, chat.roomId);
-                div.innerHTML = `
-                    <div class="user-avatar">${chat.avatar || '💌'}</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; font-size: 0.9rem;">${chat.name}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-sub);">${chat.lastMsg || 'لا توجد رسائل'}</div>
-                    </div>
-                `;
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'user-avatar';
+                avatarDiv.textContent = chat.avatar || '💌';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.style.flex = '1';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.style.fontWeight = 'bold';
+                nameDiv.style.fontSize = '0.9rem';
+                nameDiv.textContent = chat.name;
+
+                const msgDiv = document.createElement('div');
+                msgDiv.style.fontSize = '0.75rem';
+                msgDiv.style.color = 'var(--text-sub)';
+                msgDiv.textContent = chat.lastMsg || 'لا توجد رسائل';
+
+                contentDiv.appendChild(nameDiv);
+                contentDiv.appendChild(msgDiv);
+
+                div.appendChild(avatarDiv);
+                div.appendChild(contentDiv);
+
                 container.appendChild(div);
             });
         });
@@ -542,7 +571,7 @@
         document.getElementById('page-room').classList.add('active');
 
         document.getElementById('room-name').innerText = name;
-        document.getElementById('room-avatar').innerText = avatar || '❤️';
+        document.getElementById('room-avatar').innerText = avatar || '❤️️';
 
         // الاستماع الفوري للرسائل الحقيقية
         db.ref('messages/' + roomId).on('value', snapshot => {
@@ -555,10 +584,17 @@
                     const isMe = m.senderUid === currentUser.uid;
                     const div = document.createElement('div');
                     div.className = `msg ${isMe ? 'out' : 'in'}`;
-                    div.innerHTML = `
-                        <div>${m.text}</div>
-                        <span class="msg-time">${m.time}</span>
-                    `;
+
+                    const textDiv = document.createElement('div');
+                    textDiv.textContent = m.text;
+
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'msg-time';
+                    timeSpan.textContent = m.time;
+
+                    div.appendChild(textDiv);
+                    div.appendChild(timeSpan);
+
                     container.appendChild(div);
                 });
                 container.scrollTop = container.scrollHeight;
