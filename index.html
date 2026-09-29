@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نبضات Messenger - فخامة الحب</title>
+    <title>نبضات Messenger - حقيقي وبث مباشر</title>
+
+    <!-- Firebase SDK (Version 9 Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --primary: #ff2a5f;
             --primary-grad: linear-gradient(135deg, #ff2a5f 0%, #ff6b81 100%);
-            --accent-purple: #8a2be2;
             --bg-dark: #0f0c20;
             --card-glass: rgba(255, 255, 255, 0.08);
             --border-glass: rgba(255, 255, 255, 0.15);
@@ -36,19 +41,18 @@
             overflow: hidden;
         }
 
-        /* إطار الهاتف المحمول الفخم */
         .app-container {
             width: 100%;
             max-width: 420px;
             height: 100vh;
             max-height: 880px;
-            background: rgba(20, 15, 38, 0.7);
+            background: rgba(20, 15, 38, 0.85);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 40px rgba(255, 42, 95, 0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             overflow: hidden;
             border: 1px solid var(--border-glass);
         }
@@ -60,7 +64,7 @@
             }
         }
 
-        /* --- شاشة الدخول والتسجيل --- */
+        /* --- شاشة التسجيل والتسجيل الحقيقي عبر Firebase --- */
         .auth-screen {
             position: absolute;
             inset: 0;
@@ -81,72 +85,55 @@
 
         .auth-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .auth-header h1 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             background: var(--primary-grad);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-
-        .auth-header p {
-            color: var(--text-sub);
-            font-size: 0.9rem;
         }
 
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
 
         .input-group label {
             display: block;
             font-size: 0.8rem;
             color: var(--text-sub);
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .input-group input, .input-group select {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 15px;
             background: rgba(255,255,255,0.05);
             border: 1px solid var(--border-glass);
-            border-radius: 15px;
+            border-radius: 12px;
             color: white;
             outline: none;
-            font-size: 0.95rem;
-            transition: 0.3s;
-        }
-
-        .input-group input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 12px rgba(255, 42, 95, 0.3);
+            font-size: 0.9rem;
         }
 
         .btn-primary {
             width: 100%;
-            padding: 15px;
+            padding: 14px;
             background: var(--primary-grad);
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             color: white;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 42, 95, 0.35);
-            transition: 0.3s;
+            box-shadow: 0 6px 18px rgba(255, 42, 95, 0.35);
             margin-top: 10px;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
         }
 
         .auth-toggle {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 15px;
             font-size: 0.85rem;
             color: var(--text-sub);
         }
@@ -157,9 +144,9 @@
             cursor: pointer;
         }
 
-        /* --- الهيدر الرئيسي --- */
+        /* --- الهيدر والواجهات --- */
         .app-header {
-            padding: 18px 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -168,106 +155,29 @@
             z-index: 10;
         }
 
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
         .user-avatar {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--primary-grad);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            border: 2px solid rgba(255,255,255,0.2);
-            position: relative;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #00ff88;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            border: 2px solid var(--bg-dark);
-        }
-
-        .header-title-text {
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
+            font-size: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .icon-btn {
             background: rgba(255,255,255,0.08);
             border: none;
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: pointer;
-            font-size: 1rem;
-            transition: 0.3s;
+            font-size: 0.9rem;
         }
 
-        .icon-btn:hover {
-            background: rgba(255,255,255,0.18);
-        }
-
-        /* --- قصص الحب (Stories) --- */
-        .stories-bar {
-            display: flex;
-            gap: 15px;
-            padding: 15px 20px;
-            overflow-x: auto;
-            border-bottom: 1px solid var(--border-glass);
-            scrollbar-width: none;
-        }
-
-        .stories-bar::-webkit-scrollbar { display: none; }
-
-        .story-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .story-ring {
-            padding: 2px;
-            background: var(--primary-grad);
-            border-radius: 50%;
-        }
-
-        .story-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: #1f1b3a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            border: 2px solid var(--bg-dark);
-        }
-
-        .story-name {
-            font-size: 0.7rem;
-            color: var(--text-sub);
-        }
-
-        /* --- محتوى الصفحات --- */
         .app-content {
             flex: 1;
             overflow-y: auto;
@@ -277,72 +187,31 @@
         .page {
             display: none;
             height: 100%;
-            animation: fadeIn 0.3s ease;
+            flex-direction: column;
         }
 
         .page.active {
             display: flex;
-            flex-direction: column;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* --- قائمة المحادثات (Chats List) --- */
+        /* --- قائمة الدردشات --- */
         .chat-list {
-            padding: 10px 15px;
+            padding: 15px;
         }
 
         .chat-item {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px;
-            border-radius: 20px;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 18px;
             margin-bottom: 8px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255,255,255,0.05);
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .chat-item:hover, .chat-item:active {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(-3px);
-        }
-
-        .chat-details {
-            flex: 1;
-        }
-
-        .chat-top-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .chat-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .chat-time {
-            font-size: 0.7rem;
-            color: var(--text-sub);
-        }
-
-        .chat-preview {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 220px;
-        }
-
-        /* --- شاشة المحادثة (Messenger Chat Room) --- */
+        /* --- غرفة الدردشة --- */
         .chat-room-header {
             display: flex;
             align-items: center;
@@ -354,83 +223,46 @@
 
         .messages-area {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .msg {
             max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 22px;
-            font-size: 0.9rem;
-            line-height: 1.45;
-            position: relative;
-            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.88rem;
+            line-height: 1.4;
+            word-break: break-word;
         }
 
         .msg.in {
             align-self: flex-start;
             background: var(--msg-in);
             border-bottom-right-radius: 4px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .msg.out {
             align-self: flex-end;
             background: var(--msg-out);
             border-bottom-left-radius: 4px;
-            box-shadow: 0 4px 15px rgba(255, 42, 95, 0.3);
         }
 
-        .msg-meta {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.6);
-            margin-top: 4px;
+        .msg-time {
+            font-size: 0.6rem;
+            opacity: 0.7;
+            margin-top: 3px;
             display: block;
-            text-align: left;
         }
 
-        .typing-indicator {
-            align-self: flex-start;
-            background: var(--msg-in);
-            padding: 10px 16px;
-            border-radius: 18px;
-            display: none;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .typing-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--text-sub);
-            border-radius: 50%;
-            animation: pulse 1s infinite alternate;
-        }
-
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes pulse {
-            to { opacity: 0.3; transform: translateY(-3px); }
-        }
-
-        /* شريط إدخال الرسالة */
         .chat-bar {
-            padding: 12px 15px;
+            padding: 10px 15px;
             background: rgba(0,0,0,0.3);
             border-top: 1px solid var(--border-glass);
             display: flex;
-            align-items: center;
             gap: 10px;
         }
 
@@ -438,74 +270,25 @@
             flex: 1;
             background: rgba(255,255,255,0.08);
             border: 1px solid var(--border-glass);
-            padding: 12px 18px;
-            border-radius: 25px;
+            padding: 10px 15px;
+            border-radius: 20px;
             color: white;
             outline: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
-        .chat-input::placeholder { color: var(--text-sub); }
-
-        .send-btn-round {
-            background: var(--primary-grad);
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 42, 95, 0.4);
-            font-size: 1.1rem;
-        }
-
-        /* --- شريط التنقل السفلي --- */
-        .bottom-nav {
-            display: flex;
-            background: rgba(15, 12, 32, 0.8);
-            border-top: 1px solid var(--border-glass);
-            height: 65px;
-            backdrop-filter: blur(10px);
-        }
-
-        .nav-link {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            color: var(--text-sub);
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .nav-link.active {
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .nav-icon {
-            font-size: 1.3rem;
-        }
-
-        /* زر العائم */
         .fab {
             position: absolute;
-            bottom: 80px;
+            bottom: 20px;
             left: 20px;
             background: var(--primary-grad);
-            width: 52px;
-            height: 52px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             box-shadow: 0 8px 25px rgba(255, 42, 95, 0.5);
             cursor: pointer;
             border: none;
@@ -517,37 +300,37 @@
 
 <div class="app-container">
 
-    <!-- 🔐 شاشة التسجيل وتطبيقات الحسابات -->
+    <!-- 🔐 شاشة التسجيل والتسجيل الحقيقي عبر Firebase -->
     <div class="auth-screen" id="auth-screen">
         <div class="auth-header">
             <h1>نبضات Messenger ❤️</h1>
-            <p id="auth-subtitle">سجل دخولك لعالم الحب والشوق</p>
+            <p id="auth-subtitle" style="font-size: 0.8rem; color: var(--text-sub);">سجل حساب حقيقي للتواصل الفوري</p>
         </div>
 
         <form id="auth-form" onsubmit="handleAuth(event)">
             <div class="input-group" id="group-name" style="display: none;">
-                <label>الاسم الكامل / لقبك الرومانسي</label>
-                <input type="text" id="auth-name" placeholder="مثال: أمير الحب">
+                <label>الاسم الكامل</label>
+                <input type="text" id="auth-name" placeholder="اسمك الذي سيظهر للمستخدمين">
             </div>
 
             <div class="input-group" id="group-avatar" style="display: none;">
-                <label>اختر رمزك التعبيري (الأفاتار)</label>
+                <label>الأفاتار</label>
                 <select id="auth-avatar">
                     <option value="👑">👑 ملك / ملكة</option>
-                    <option value="💖">💖 قلب محب</option>
-                    <option value="🌹">🌹 وردة الهوى</option>
-                    <option value="🕊️️">🕊️ طير الشوق</option>
+                    <option value="💖">💖 قلب</option>
+                    <option value="🌹">🌹 وردة</option>
+                    <option value="🕊">🕊️ طير</option>
                 </select>
             </div>
 
             <div class="input-group">
-                <label>البريد الإلكتروني</label>
-                <input type="email" id="auth-email" placeholder="name@love.com" required>
+                <label>البريد الإلكتروني الحقيقي</label>
+                <input type="email" id="auth-email" placeholder="example@mail.com" required>
             </div>
 
             <div class="input-group">
                 <label>كلمة السر</label>
-                <input type="password" id="auth-pass" placeholder="••••••••" required>
+                <input type="password" id="auth-pass" placeholder="••••••••" required minlength="6">
             </div>
 
             <button type="submit" class="btn-primary" id="auth-btn">تسجيل الدخول</button>
@@ -559,383 +342,254 @@
         </div>
     </div>
 
-    <!-- 🔝 الهيدر العلوي -->
+    <!-- 🔝 الشريط العلوي -->
     <header class="app-header">
-        <div class="header-user">
-            <div class="user-avatar" id="my-avatar">
-                👑
-                <div class="status-dot"></div>
-            </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="user-avatar" id="my-avatar">👑</div>
             <div>
-                <div class="header-title-text" id="my-name">المحادثات</div>
-                <div style="font-size: 0.65rem; color: #00ff88;" id="my-status">نشط الآن</div>
+                <div style="font-weight: bold; font-size: 1rem;" id="my-name">المحادثات</div>
+                <div style="font-size: 0.65rem; color: #00ff88;">حقيقي ومباشر 🟢</div>
             </div>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <button class="icon-btn" onclick="triggerHearts()">❤️</button>
-            <button class="icon-btn" onclick="logout()" title="تسجيل الخروج">🚪</button>
-        </div>
+        <button class="icon-btn" onclick="logout()" title="تسجيل الخروج">🚪</button>
     </header>
 
-    <!-- 📱 محتوى التطبيق -->
+    <!-- 📱 المحتوى الرئيسي -->
     <main class="app-content">
 
         <!-- 1️⃣ صفحة قائمة المحادثات -->
         <section id="page-chats" class="page active">
-            <!-- قصص الحب العلوية -->
-            <div class="stories-bar">
-                <div class="story-item" onclick="alert('إضافة قصة حب جديدة...')">
-                    <div class="story-ring" style="background: rgba(255,255,255,0.2);">
-                        <div class="story-avatar">➕</div>
-                    </div>
-                    <span class="story-name">قصتك</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-ring"><div class="story-avatar">💖</div></div>
-                    <span class="story-name">نبض قلبي</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-ring"><div class="story-avatar">🌹</div></div>
-                    <span class="story-name">عطر الشوق</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-ring"><div class="story-avatar">🌙</div></div>
-                    <span class="story-name">همس الليل</span>
-                </div>
-            </div>
-
-            <!-- قائمة الشات -->
             <div class="chat-list" id="chats-container"></div>
-            <button class="fab" onclick="addNewContact()">💬</button>
+            <button class="fab" onclick="startNewRealChat()" title="بدء محادثة مع مستخدم آخر">➕</button>
         </section>
 
-        <!-- 2️⃣ غرفة المحادثة الفردية -->
+        <!-- 2️⃣ غرفة الشات الحقيقية -->
         <section id="page-room" class="page">
             <div class="chat-room-header">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="icon-btn" onclick="openPage('chats')">➔</button>
-                    <div class="user-avatar" id="room-avatar" style="width: 36px; height: 36px; font-size: 1rem;">❤️</div>
+                    <button class="icon-btn" onclick="openChatsPage()">➔</button>
+                    <div class="user-avatar" id="room-avatar" style="width: 34px; height: 34px; font-size: 0.9rem;">❤️</div>
                     <div>
-                        <div style="font-weight: bold; font-size: 0.9rem;" id="room-name">الحبيب</div>
-                        <div style="font-size: 0.65rem; color: #00ff88;">متصل الآن</div>
+                        <div style="font-weight: bold; font-size: 0.88rem;" id="room-name">المستخدم</div>
+                        <div style="font-size: 0.6rem; color: #00ff88;">اتصال حقيقي مباشر</div>
                     </div>
                 </div>
-                <button class="icon-btn" onclick="sendQuickLove()">💖</button>
             </div>
 
-            <div class="messages-area" id="messages-area">
-                <!-- الرسائل ستظهر هنا -->
-            </div>
+            <div class="messages-area" id="messages-area"></div>
 
-            <!-- مؤشر جاري الكتابة -->
-            <div class="typing-indicator" id="typing-indicator">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            </div>
-
-            <form class="chat-bar" onsubmit="handleSend(event)">
-                <input type="text" class="chat-input" id="chat-input" placeholder="اكتب رسالة حب إلكترونية..." autocomplete="off">
-                <button type="submit" class="send-btn-round">🕊️</button>
+            <form class="chat-bar" onsubmit="handleSendRealMessage(event)">
+                <input type="text" class="chat-input" id="chat-input" placeholder="اكتب رسالة حقيقية..." autocomplete="off">
+                <button type="submit" class="icon-btn" style="background: var(--primary); font-size: 1.1rem;">🕊️</button>
             </form>
         </section>
 
-        <!-- 3️⃣ صفحة البروفايل/الإعدادات -->
-        <section id="page-profile" class="page" style="padding: 25px; text-align: center;">
-            <div class="user-avatar" id="profile-big-avatar" style="width: 90px; height: 90px; font-size: 3rem; margin: 0 auto 15px auto;">👑</div>
-            <h2 id="profile-big-name" style="margin-bottom: 5px;">اسم المستخدم</h2>
-            <p id="profile-big-email" style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 25px;">email@love.com</p>
-
-            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; border: 1px solid var(--border-glass); margin-bottom: 15px;">
-                <div style="font-size: 0.8rem; color: var(--text-sub);">عدد الرسائل المرسلة</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);" id="stat-count">0</div>
-            </div>
-
-            <button class="btn-primary" style="background: rgba(255,75,92,0.2); border: 1px solid var(--primary); color: white;" onclick="logout()">تسجيل الخروج</button>
-        </section>
-
     </main>
-
-    <!-- 🧭 شريط التنقل السفلي -->
-    <nav class="bottom-nav" id="main-nav">
-        <div class="nav-link active" id="nav-chats" onclick="openPage('chats')">
-            <span class="nav-icon">💬</span>
-            <span>الدردشات</span>
-        </div>
-        <div class="nav-link" id="nav-profile" onclick="openPage('profile')">
-            <span class="nav-icon">👤</span>
-            <span>حسابي</span>
-        </div>
-    </nav>
-
 </div>
 
 <script>
-    /* --- المتغيرات والحالة العامة --- */
-    let isRegisterMode = false;
+    // تم دمج بيانات مشروعك ad7am-f3c66 بنجاح هنا ✅
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvu2oTi98xSIRELfpv7X_U-_Lo_isIOJQ",
+        authDomain: "ad7am-f3c66.firebaseapp.com",
+        databaseURL: "https://ad7am-f3c66-default-rtdb.firebaseio.com",
+        projectId: "ad7am-f3c66",
+        storageBucket: "ad7am-f3c66.firebasestorage.app",
+        messagingSenderId: "767868074527",
+        appId: "1:767868074527:web:a2a4918dad31c7220bf32a",
+        measurementId: "G-XCZPMJ8J2K"
+    };
+
+    // تهيئة Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
     let currentUser = null;
-    let activeChatId = null;
+    let activeChatRoomId = null;
+    let isRegisterMode = false;
 
-    const autoReplies = [
-        "كل نبضة في قلبي تشتاق إليك ❤️",
-        "أنت أجمل صدفة في حياتي 🌹",
-        "لا أستطيع قضاء يومي دون حديثك... ✨",
-        "أعدك أن أظل بجانبك دائماً 🕊️",
-        "حبي لك يتجدد مع كل ثانية 💖"
-    ];
-
-    const defaultChats = [
-        { id: 101, name: "توأم الروح ❤️", avatar: "💖", lastMsg: "في انتظار حديثك الشيق..." },
-        { id: 102, name: "أميرة قلبي 👑", avatar: "🌹", lastMsg: "مساء الورد والمشاعر الصادقة" }
-    ];
-
-    /* --- إدارة فتح التطبيق والتحقق من الجلسة --- */
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedUser = JSON.parse(localStorage.getItem('messenger_active_user'));
-        if (savedUser) {
-            currentUser = savedUser;
-            initApp();
+    // مراقبة حالة تسجيل الدخول الحقيقية
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            db.ref('users/' + user.uid).once('value', snapshot => {
+                currentUser = snapshot.val();
+                if (currentUser) {
+                    currentUser.uid = user.uid;
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    document.getElementById('my-avatar').innerText = currentUser.avatar || '👑';
+                    document.getElementById('my-name').innerText = currentUser.name;
+                    loadUserChatsList();
+                }
+            });
         } else {
             document.getElementById('auth-screen').classList.remove('hidden');
         }
     });
 
-    /* --- تحويل نمط تسجيل الدخول / إنشاء حساب --- */
+    // تبديل بين تسجيل الدخول وإنشاء الحساب
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
         document.getElementById('group-name').style.display = isRegisterMode ? 'block' : 'none';
         document.getElementById('group-avatar').style.display = isRegisterMode ? 'block' : 'none';
-        document.getElementById('auth-btn').innerText = isRegisterMode ? 'إنشاء الحساب' : 'تسجيل الدخول';
-        document.getElementById('auth-subtitle').innerText = isRegisterMode ? 'انضم إلى مجتمع نبضات الفخم' : 'سجل دخولك لعالم الحب والشوق';
+        document.getElementById('auth-btn').innerText = isRegisterMode ? 'إنشاء حساب حقيقي' : 'تسجيل الدخول';
         document.getElementById('toggle-text').innerText = isRegisterMode ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟';
         document.getElementById('toggle-link').innerText = isRegisterMode ? ' تسجيل الدخول' : ' إنشاء حساب جديد';
     }
 
-    /* --- معالجة الحسابات (Auth System) --- */
+    // إدارة التسجيل عبر Firebase Auth
     function handleAuth(e) {
         e.preventDefault();
         const email = document.getElementById('auth-email').value;
         const pass = document.getElementById('auth-pass').value;
 
-        let users = JSON.parse(localStorage.getItem('messenger_users')) || [];
-
         if (isRegisterMode) {
             const name = document.getElementById('auth-name').value;
             const avatar = document.getElementById('auth-avatar').value;
 
-            if (users.find(u => u.email === email)) {
-                alert('هذا البريد الإلكتروني مسجل مسبقاً!');
-                return;
-            }
-
-            currentUser = { name, email, pass, avatar };
-            users.push(currentUser);
-            localStorage.setItem('messenger_users', JSON.stringify(users));
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then(cred => {
+                    return db.ref('users/' + cred.user.uid).set({
+                        name: name,
+                        email: email,
+                        avatar: avatar
+                    });
+                })
+                .catch(err => alert("خطأ في التسجيل: " + err.message));
         } else {
-            const user = users.find(u => u.email === email && u.pass === pass);
-            if (!user) {
-                alert('البريد الإلكتروني أو كلمة السر غير صحيحة!');
-                return;
-            }
-            currentUser = user;
+            auth.signInWithEmailAndPassword(email, pass)
+                .catch(err => alert("خطأ في تسجيل الدخول: " + err.message));
         }
-
-        localStorage.setItem('messenger_active_user', JSON.stringify(currentUser));
-        initApp();
     }
 
     function logout() {
-        localStorage.removeItem('messenger_active_user');
-        location.reload();
+        auth.signOut().then(() => location.reload());
     }
 
-    /* --- تهيئة واجهة التطبيق بعد الدخول --- */
-    function initApp() {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('my-avatar').innerText = currentUser.avatar;
-        document.getElementById('my-name').innerText = currentUser.name;
-        
-        // إعداد بيانات الشات الأولى للعميل إذا لم توجد
-        if (!localStorage.getItem('messenger_chats_' + currentUser.email)) {
-            localStorage.setItem('messenger_chats_' + currentUser.email, JSON.stringify(defaultChats));
-        }
+    // تحميل قائمة المحادثات الخاصة بالمستخدم من السحابة
+    function loadUserChatsList() {
+        db.ref('user_chats/' + currentUser.uid).on('value', snapshot => {
+            const container = document.getElementById('chats-container');
+            container.innerHTML = '';
+            const chats = snapshot.val();
 
-        renderChats();
-        openPage('chats');
-    }
+            if (!chats) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-sub); margin-top:30px; font-size:0.85rem;">لا توجد محادثات حتى الآن.<br>اضغط على (+) لبدء محادثة حقيقية.</div>';
+                return;
+            }
 
-    /* --- التنقل بين الصفحات --- */
-    function openPage(pageName) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-
-        if (pageName === 'chats') {
-            document.getElementById('page-chats').classList.add('active');
-            document.getElementById('nav-chats').classList.add('active');
-            document.getElementById('main-nav').style.display = 'flex';
-            renderChats();
-        } else if (pageName === 'profile') {
-            document.getElementById('page-profile').classList.add('active');
-            document.getElementById('nav-profile').classList.add('active');
-            document.getElementById('main-nav').style.display = 'flex';
-            
-            document.getElementById('profile-big-avatar').innerText = currentUser.avatar;
-            document.getElementById('profile-big-name').innerText = currentUser.name;
-            document.getElementById('profile-big-email').innerText = currentUser.email;
-            
-            const msgs = JSON.parse(localStorage.getItem('messenger_msgs_' + currentUser.email)) || {};
-            let total = 0;
-            Object.values(msgs).forEach(arr => total += arr.length);
-            document.getElementById('stat-count').innerText = total;
-        }
-    }
-
-    /* --- عرض قائمة المحادثات --- */
-    function renderChats() {
-        const chats = JSON.parse(localStorage.getItem('messenger_chats_' + currentUser.email)) || [];
-        const container = document.getElementById('chats-container');
-        container.innerHTML = '';
-
-        chats.forEach(chat => {
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.onclick = () => startChatRoom(chat);
-            div.innerHTML = `
-                <div class="user-avatar" style="width: 48px; height: 48px; font-size: 1.4rem;">${chat.avatar}</div>
-                <div class="chat-details">
-                    <div class="chat-top-row">
-                        <span class="chat-name">${chat.name}</span>
-                        <span class="chat-time">الآن</span>
+            Object.keys(chats).forEach(targetUid => {
+                const chat = chats[targetUid];
+                const div = document.createElement('div');
+                div.className = 'chat-item';
+                div.onclick = () => openChatRoom(targetUid, chat.name, chat.avatar, chat.roomId);
+                div.innerHTML = `
+                    <div class="user-avatar">${chat.avatar || '💌'}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; font-size: 0.9rem;">${chat.name}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-sub);">${chat.lastMsg || 'لا توجد رسائل'}</div>
                     </div>
-                    <div class="chat-preview">${chat.lastMsg}</div>
-                </div>
-            `;
-            container.appendChild(div);
+                `;
+                container.appendChild(div);
+            });
         });
     }
 
-    /* --- دخول غرفة الشات (Messenger Room) --- */
-    function startChatRoom(chat) {
-        activeChatId = chat.id;
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // إيجاد مستخدم وبدء محادثة حقيقية
+    function startNewRealChat() {
+        const targetEmail = prompt("أدخل البريد الإلكتروني للمستخدم الآخر الحقيقي:");
+        if (!targetEmail) return;
+
+        db.ref('users').orderByChild('email').equalTo(targetEmail).once('value', snapshot => {
+            const users = snapshot.val();
+            if (!users) {
+                alert("لم يتم العثور على مستخدم بهذا البريد الإلكتروني.");
+                return;
+            }
+
+            const targetUid = Object.keys(users)[0];
+            if (targetUid === currentUser.uid) {
+                alert("لا يمكنك مراسلة نفسك!");
+                return;
+            }
+
+            const targetUser = users[targetUid];
+            const roomId = [currentUser.uid, targetUid].sort().join('_');
+
+            // ربط المستخدمين معاً
+            db.ref(`user_chats/${currentUser.uid}/${targetUid}`).set({
+                name: targetUser.name,
+                avatar: targetUser.avatar,
+                roomId: roomId,
+                lastMsg: "بداية المحادثة"
+            });
+
+            db.ref(`user_chats/${targetUid}/${currentUser.uid}`).set({
+                name: currentUser.name,
+                avatar: currentUser.avatar,
+                roomId: roomId,
+                lastMsg: "بداية المحادثة"
+            });
+
+            openChatRoom(targetUid, targetUser.name, targetUser.avatar, roomId);
+        });
+    }
+
+    // فتح غرفة الشات واستماع الرسائل المباشرة
+    function openChatRoom(targetUid, name, avatar, roomId) {
+        activeChatRoomId = roomId;
+        document.getElementById('page-chats').classList.remove('active');
         document.getElementById('page-room').classList.add('active');
-        document.getElementById('main-nav').style.display = 'none';
 
-        document.getElementById('room-avatar').innerText = chat.avatar;
-        document.getElementById('room-name').innerText = chat.name;
+        document.getElementById('room-name').innerText = name;
+        document.getElementById('room-avatar').innerText = avatar || '❤️';
 
-        renderMessages();
-    }
+        // الاستماع الفوري للرسائل الحقيقية
+        db.ref('messages/' + roomId).on('value', snapshot => {
+            const container = document.getElementById('messages-area');
+            container.innerHTML = '';
+            const msgs = snapshot.val();
 
-    /* --- عرض الرسائل داخل الغرفة --- */
-    function renderMessages() {
-        const allMsgs = JSON.parse(localStorage.getItem('messenger_msgs_' + currentUser.email)) || {};
-        const msgs = allMsgs[activeChatId] || [];
-        const container = document.getElementById('messages-area');
-        container.innerHTML = '';
-
-        msgs.forEach(m => {
-            const div = document.createElement('div');
-            div.className = `msg ${m.type === 'sent' ? 'out' : 'in'}`;
-            div.innerHTML = `
-                <div>${m.text}</div>
-                <span class="msg-meta">${m.time}</span>
-            `;
-            container.appendChild(div);
+            if (msgs) {
+                Object.values(msgs).forEach(m => {
+                    const isMe = m.senderUid === currentUser.uid;
+                    const div = document.createElement('div');
+                    div.className = `msg ${isMe ? 'out' : 'in'}`;
+                    div.innerHTML = `
+                        <div>${m.text}</div>
+                        <span class="msg-time">${m.time}</span>
+                    `;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+            }
         });
-
-        container.scrollTop = container.scrollHeight;
     }
 
-    /* --- إرسال رسالة جديدة + محاكاة الرد --- */
-    function handleSend(e) {
+    function openChatsPage() {
+        if (activeChatRoomId) db.ref('messages/' + activeChatRoomId).off();
+        document.getElementById('page-room').classList.remove('active');
+        document.getElementById('page-chats').classList.add('active');
+    }
+
+    // إرسال رسالة حقيقية في الوقت الفعلي
+    function handleSendRealMessage(e) {
         e.preventDefault();
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
-        if (!text) return;
+        if (!text || !activeChatRoomId) return;
 
         const time = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-        saveMessage(activeChatId, text, 'sent', time);
+
+        const newMsgRef = db.ref('messages/' + activeChatRoomId).push();
+        newMsgRef.set({
+            senderUid: currentUser.uid,
+            text: text,
+            time: time,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+
         input.value = '';
-        renderMessages();
-
-        // إظهار مؤشر الكتابة للطرف الآخر
-        const indicator = document.getElementById('typing-indicator');
-        indicator.style.display = 'flex';
-        const msgsArea = document.getElementById('messages-area');
-        msgsArea.scrollTop = msgsArea.scrollHeight;
-
-        setTimeout(() => {
-            indicator.style.display = 'none';
-            const randomReply = autoReplies[Math.floor(Math.random() * autoReplies.length)];
-            saveMessage(activeChatId, randomReply, 'received', time);
-            renderMessages();
-        }, 1800);
-    }
-
-    /* --- حفظ الرسالة والتحديث التلقائي --- */
-    function saveMessage(chatId, text, type, time) {
-        const key = 'messenger_msgs_' + currentUser.email;
-        const allMsgs = JSON.parse(localStorage.getItem(key)) || {};
-        if (!allMsgs[chatId]) allMsgs[chatId] = [];
-
-        allMsgs[chatId].push({ text, type, time });
-        localStorage.setItem(key, JSON.stringify(allMsgs));
-
-        // تحديث النص الأخير في قائمة المحادثات
-        const chatKey = 'messenger_chats_' + currentUser.email;
-        const chats = JSON.parse(localStorage.getItem(chatKey)) || [];
-        const targetChat = chats.find(c => c.id === chatId);
-        if (targetChat) {
-            targetChat.lastMsg = text;
-            localStorage.setItem(chatKey, JSON.stringify(chats));
-        }
-    }
-
-    /* --- إضافة محادثة جديدة --- */
-    function addNewContact() {
-        const name = prompt("أدخل اسم المحبوب أو جهة الاتصال الجديدة:");
-        if (name) {
-            const chatKey = 'messenger_chats_' + currentUser.email;
-            const chats = JSON.parse(localStorage.getItem(chatKey)) || [];
-            const newChat = {
-                id: Date.now(),
-                name: name,
-                avatar: "💌",
-                lastMsg: "بدء محادثة جديدة..."
-            };
-            chats.unshift(newChat);
-            localStorage.setItem(chatKey, JSON.stringify(chats));
-            renderChats();
-        }
-    }
-
-    /* --- تأثيرات القلوب الفخمة السريعة --- */
-    function sendQuickLove() {
-        const time = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-        saveMessage(activeChatId, "❤️", 'sent', time);
-        renderMessages();
-    }
-
-    function triggerHearts() {
-        for(let i=0; i<10; i++) {
-            const heart = document.createElement('div');
-            heart.innerText = '💖';
-            heart.style.position = 'fixed';
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.top = '100vh';
-            heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
-            heart.style.transition = 'all 2s ease-out';
-            heart.style.zIndex = '1000';
-            document.body.appendChild(heart);
-
-            setTimeout(() => {
-                heart.style.transform = `translateY(-110vh) rotate(${Math.random() * 360}deg)`;
-                heart.style.opacity = '0';
-            }, 50);
-
-            setTimeout(() => heart.remove(), 2000);
-        }
     }
 </script>
 
